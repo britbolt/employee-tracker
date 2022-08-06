@@ -25,7 +25,7 @@ router.get('/employees', (req, res) => {
 
   // Get single employee with role
 router.get('/employee/:id', (req, res) => {
-    const sql = `SELECT employees.*, role.title 
+    const sql = `SELECT employees.*, roles.title 
                  AS role_title 
                  FROM employees 
                  LEFT JOIN roles 
@@ -45,7 +45,7 @@ router.get('/employee/:id', (req, res) => {
     });
   });
 
-  // Create a employees
+  // Create an employee
 router.post('/employees', ({ body }, res) => {
     const errors = inputCheck(
       body,
@@ -79,4 +79,25 @@ router.post('/employees', ({ body }, res) => {
     });
   });
 
+  
+// Delete an employee
+router.delete('/employee/:id', (req, res) => {
+    const sql = `DELETE FROM employees WHERE id = ?`;
+  
+    db.query(sql, req.params.id, (err, result) => {
+      if (err) {
+        res.status(400).json({ error: res.message });
+      } else if (!result.affectedRows) {
+        res.json({
+          message: 'Employee not found'
+        });
+      } else {
+        res.json({
+          message: 'deleted',
+          changes: result.affectedRows,
+          id: req.params.id
+        });
+      }
+    });
+  });
   module.exports = router;
