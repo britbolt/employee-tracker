@@ -4,6 +4,7 @@ const db = require('../../db/connection');
 const inputCheck = require('../../utils/inputCheck');
 
 // Get all employees and their roles
+const viewAllEmployees = () => {
 router.get('/employees', (req, res) => {
     const sql = `SELECT employees.*, roles.title
                   AS role_title 
@@ -22,7 +23,7 @@ router.get('/employees', (req, res) => {
       });
     });
   });
-
+}
   // Get single employee with role
 router.get('/employee/:id', (req, res) => {
     const sql = `SELECT employees.*, roles.title 

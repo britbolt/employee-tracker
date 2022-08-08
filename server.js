@@ -1,8 +1,9 @@
 const express = require('express');
+const inquirer = require('inquirer');
 const db = require('./db/connection');
 const apiRoutes = require('./routes/apiRoutes');
 const cTable = require('console.table');
-const inquirer = require('inquirer');
+
 
 const PORT = process.env.PORT || 3001;
 const app = express();
@@ -28,6 +29,30 @@ db.connect(err => {
     });
   });
 
+
+  // Get all employees and their roles
+const viewAllEmployees = () => {
+    router.get('/employees', (req, res) => {
+        const sql = `SELECT employees.*, roles.title
+                      AS role_title 
+                      FROM employees
+                      LEFT JOIN roles 
+                      ON employees.role_id = roles.id`;
+      
+        db.query(sql, (err, rows) => {
+          if (err) {
+            res.status(500).json({ error: err.message });
+            return;
+          }
+          res.json({
+            message: 'success',
+            data: rows
+          });
+        });
+      });
+    }
+
+    
   function start() {
     inquirer.prompt ([
         {
@@ -132,7 +157,7 @@ function viewAllEmployees() {
     connection.query("SELECT * FROM employees",
     function(err, res) {
       if (err) throw err;
-      console.table(res);
+      cTable(res);
       start();
     });
   }
