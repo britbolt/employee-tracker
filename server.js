@@ -1,7 +1,21 @@
 import inquirer from 'inquirer';
 import cTable from 'console.table';
 
-const db = require('./db/connection');
+import { createConnection } from 'mysql2';
+
+// Connect to database
+const db = createConnection(
+    {
+      host: 'localhost',
+      // Your MySQL username,
+      user: 'root',
+      // Your MySQL password
+      password: 'bootcamp!123',
+      database: 'employees'
+    },
+    console.log('Connected to the employees database.')
+  );
+
 
 
 // Start server after DB connection
@@ -32,7 +46,7 @@ db.connect(err => {
             ]
         }
     ])
-    .then (function(res){
+    .then(function(res){
         switch (res.start){
             case "add employee":
                 addEmployee();
@@ -124,7 +138,6 @@ function viewAllEmployees() {
 
 // Add an employee to the db
 function addEmployee() {
-    console.log('adding a new employee');
     inquirer.prompt([
         {
             type:"input",
@@ -150,7 +163,7 @@ function addEmployee() {
         }
     ])
     .then (function(res){
-      const error = inputCheck(
+      const errors = inputCheck(
         body,
         'first_name',
         'last_name',
@@ -159,15 +172,16 @@ function addEmployee() {
       );
         db.query(
             "INSERT INTO employees SET ?",
-            {firstName: res.first_name,
+            {
+            firstName: res.first_name,
             lastName: res.last_name,
+            roleId: role_id,
             managerID: manager_id,
-            roleId: role_id},
-            
-            function(err) {
-             if(err) throw error;
+            }, 
+            function(errors) {
+             if(errors) throw error;
              console.log("employee added successfully!"); 
-                
+              cTable(res);
              startPrompts();
             }
         );
