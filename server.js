@@ -1,59 +1,19 @@
-const express = require('express');
 const inquirer = require('inquirer');
 const db = require('./db/connection');
-const apiRoutes = require('./routes/apiRoutes');
 const cTable = require('console.table');
 
 
-const PORT = process.env.PORT || 3001;
-const app = express();
-
-// express middleware
-app.use(express.urlencoded({ extended: false }));
-app.use(express.json());
-
-// Use apiRoutes
-app.use('/api', apiRoutes);
-
-// Default response for any other request (Not Found)
-app.use((req, res) => {
-    res.status(404).end();
-  });
 
   // Start server after DB connection
 db.connect(err => {
     if (err) throw err;
     console.log('Database connected.');
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-    });
+    startPrompts();
   });
 
 
-  // Get all employees and their roles
-const viewAllEmployees = () => {
-    router.get('/employees', (req, res) => {
-        const sql = `SELECT employees.*, roles.title
-                      AS role_title 
-                      FROM employees
-                      LEFT JOIN roles 
-                      ON employees.role_id = roles.id`;
-      
-        db.query(sql, (err, rows) => {
-          if (err) {
-            res.status(500).json({ error: err.message });
-            return;
-          }
-          res.json({
-            message: 'success',
-            data: rows
-          });
-        });
-      });
-    }
-
-    
-  function start() {
+   
+  function startPrompts() {
     inquirer.prompt ([
         {
             type:"list",
@@ -113,7 +73,55 @@ const viewAllEmployees = () => {
          })
      };
 
+// Get all employees and their roles
+function viewAllEmployees() {
+      const sql = `SELECT employees.*, roles.title
+                    AS role_title 
+                    FROM employees
+                    LEFT JOIN roles 
+                    ON employees.role_id = roles.id`;
+    
+      db.query(sql, (err, rows) => {
+        if (err) {
+          res.status(500).json({ error: err.message });
+          return;
+        }
+       console.log("employee list");
+       cTable(rows);
+       startPrompts();
+      });
+    };
 
+    function viewAllDept() {
+      const sql = `SELECT departments.id 
+                    AS ID,
+                    departments.name AS Department FROM departments`;
+      db.query(sql, (err, rows) => {
+        if (err) {
+          res.status(500).json({ error: err.message });
+          return;
+        }
+       console.log("department list");
+       cTable(rows);
+       startPrompts();
+      });
+    };
+
+    // view all roles
+    function viewAllRoles() {
+      const sql = `SELECT * FROM roles`;
+      db.query(sql, (err, rows) => {
+        if (err) {
+          res.status(500).json({ error: err.message });
+          return;
+        }
+       console.log("Roles list");
+       cTable(rows);
+       startPrompts();
+      });
+    };
+
+  // Add an employee to the db
 function addEmployee() {
     console.log('adding a new employee');
     inquirer.prompt([
@@ -141,24 +149,29 @@ function addEmployee() {
         }
     ])
     .then (function(res){
-        const query = connection.query(
+      const errors = inputCheck(
+        body,
+        'first_name',
+        'last_name',
+        'role_id',
+        'manager_id'
+      );
+        db.query(
             "INSERT INTO employees SET ?",
-            res,
-            function(err, res) {
+            {firstName: res.first_name,
+            lastName: res.last_name,
+            managerID: manager_id,
+            roleId: role_id},
+            
+            function(err) {
              if(err) throw err;
-             console.log("employee added successfully!");    
-             start();
+             console.log("employee added successfully!"); 
+                
+             startPrompts();
             }
         );
     })
 }
-function viewAllEmployees() {
-
-    connection.query("SELECT * FROM employees",
-    function(err, res) {
-      if (err) throw err;
-      cTable(res);
-      start();
-    });
-  }
+  
+  
     
