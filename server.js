@@ -1,12 +1,13 @@
 import inquirer from 'inquirer';
 import cTable from 'console.table';
 
-import { createConnection } from 'mysql2';
+import mysql from 'mysql2';
 
 // Connect to database
-const db = createConnection(
+const connection = mysql.createConnection(
     {
       host: 'localhost',
+      port: 3306,
       // Your MySQL username,
       user: 'root',
       // Your MySQL password
@@ -15,11 +16,8 @@ const db = createConnection(
     },
     console.log('Connected to the employee database.')
   );
-
-
-
 // Start server after DB connection
-db.connect(err => {
+connection.connect(err => {
     if (err) throw err;
     console.log('Database connected.');
     startPrompts();
@@ -53,7 +51,15 @@ db.connect(err => {
                 break;
 
                 case "View all Employees":
-                viewAllEmployees();
+                
+                    const sql = `SELECT employees * FROM employees`;
+                      connection.query(sql, (err, rows) => {
+                      if (err) throw err;
+                     console.log("employee list");
+                     console.log(rows);
+                     startPrompts();
+                    });
+                  
                 break; 
               
                 case "Remove Employee": 
@@ -89,19 +95,14 @@ db.connect(err => {
 
 // Get all employees and their roles
 function viewAllEmployees() {
-      const sql = `SELECT employees.*, roles.title
-                    AS role_title 
-                    FROM employees
-                    LEFT JOIN roles 
-                    ON employees.role_id = roles.id`;
-    
-      db.query(sql, (err, rows) => {
+      const sql = `SELECT employees * FROM employees`;
+        connection.query(sql, (res) => {
         if (err) {
           res.status(500).json({ error: err.message });
           return;
         }
        console.log("employee list");
-       cTable(rows);
+       console.table(res);
        startPrompts();
       });
     };
@@ -111,7 +112,7 @@ function viewAllEmployees() {
       const sql = `SELECT departments.id 
                     AS ID,
                     departments.name AS Department FROM departments`;
-      db.query(sql, (err, rows) => {
+        connection.query(sql, (err, rows) => {
         if (err) {
           res.status(500).json({ error: err.message });
           return;
@@ -125,7 +126,7 @@ function viewAllEmployees() {
   // view all roles
     function viewAllRoles() {
       const sql = `SELECT * FROM roles`;
-      db.query(sql, (err, rows) => {
+      connection.query(sql, (err, rows) => {
         if (err) {
           res.status(500).json({ error: err.message });
           return;
@@ -164,7 +165,7 @@ function addEmployee() {
     ])
     .then (function(res){
       
-        db.query(
+      connection.query(
             "INSERT INTO employees SET ?",
             {
             firstName: res.first_name,
