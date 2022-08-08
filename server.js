@@ -11,9 +11,9 @@ const db = createConnection(
       user: 'root',
       // Your MySQL password
       password: 'bootcamp!123',
-      database: 'employees'
+      database: 'employee_db',
     },
-    console.log('Connected to the employees database.')
+    console.log('Connected to the employee database.')
   );
 
 
@@ -26,7 +26,7 @@ db.connect(err => {
   });
 
 
-// function to begin question series for user
+  // function to begin question series for user
   function startPrompts() {
     inquirer.prompt ([
         {
@@ -163,13 +163,7 @@ function addEmployee() {
         }
     ])
     .then (function(res){
-      const errors = inputCheck(
-        body,
-        'first_name',
-        'last_name',
-        'role_id',
-        'manager_id'
-      );
+      
         db.query(
             "INSERT INTO employees SET ?",
             {
@@ -178,8 +172,8 @@ function addEmployee() {
             roleId: role_id,
             managerID: manager_id,
             }, 
-            function(errors) {
-             if(errors) throw error;
+            function(err, res) {
+             if(err) throw err;
              console.log("employee added successfully!"); 
               cTable(res);
              startPrompts();
