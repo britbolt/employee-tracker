@@ -1,10 +1,10 @@
-const inquirer = require('inquirer');
+import inquirer from 'inquirer';
+import cTable from 'console.table';
+
 const db = require('./db/connection');
-const cTable = require('console.table');
 
 
-
-  // Start server after DB connection
+// Start server after DB connection
 db.connect(err => {
     if (err) throw err;
     console.log('Database connected.');
@@ -12,7 +12,7 @@ db.connect(err => {
   });
 
 
-   
+// function to begin question series for user
   function startPrompts() {
     inquirer.prompt ([
         {
@@ -92,6 +92,7 @@ function viewAllEmployees() {
       });
     };
 
+// view all departments
     function viewAllDept() {
       const sql = `SELECT departments.id 
                     AS ID,
@@ -107,7 +108,7 @@ function viewAllEmployees() {
       });
     };
 
-    // view all roles
+  // view all roles
     function viewAllRoles() {
       const sql = `SELECT * FROM roles`;
       db.query(sql, (err, rows) => {
@@ -121,7 +122,7 @@ function viewAllEmployees() {
       });
     };
 
-  // Add an employee to the db
+// Add an employee to the db
 function addEmployee() {
     console.log('adding a new employee');
     inquirer.prompt([
@@ -149,7 +150,7 @@ function addEmployee() {
         }
     ])
     .then (function(res){
-      const errors = inputCheck(
+      const error = inputCheck(
         body,
         'first_name',
         'last_name',
@@ -164,7 +165,7 @@ function addEmployee() {
             roleId: role_id},
             
             function(err) {
-             if(err) throw err;
+             if(err) throw error;
              console.log("employee added successfully!"); 
                 
              startPrompts();
